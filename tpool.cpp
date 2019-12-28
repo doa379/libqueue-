@@ -8,6 +8,8 @@ Tpool::Tpool(void)
 
 Tpool::~Tpool(void)
 {
+  tpool_exit();
+
   if (th)
     {
       th->join();
