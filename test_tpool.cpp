@@ -22,7 +22,7 @@ int main()
   for (unsigned i = 0; i < 5; i++)
     {
       int v = rand() % 100;
-      tpool.add_job(bind(func_cb, v));
+      tpool.add_job(std::bind(func_cb, v));
       std::cout << "Data " << v << "job added" << std::endl;
     }
 

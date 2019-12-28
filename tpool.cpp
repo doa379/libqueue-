@@ -3,7 +3,7 @@
 Tpool::Tpool(void)
 {
   quit = 0;
-  th = new thread(&Tpool::worker, this);
+  th = new std::thread(&Tpool::worker, this);
 }
 
 Tpool::~Tpool(void)
@@ -22,7 +22,7 @@ void Tpool::tpool_exit(void)
   quit = 1;
 
   {
-    lock_guard<mutex> lock(q_mutex);
+    std::lock_guard<std::mutex> lock(q_mutex);
     cond_var.notify_one();
   }
 }
@@ -32,7 +32,7 @@ void Tpool::worker(void)
   while (!quit)
     {
       {
-	unique_lock<mutex> lock(q_mutex);
+	std::unique_lock<std::mutex> lock(q_mutex);
 
 	while (q.empty() && !quit)
 	  {
@@ -51,10 +51,10 @@ void Tpool::worker(void)
     }
 }
 
-void Tpool::add_job(function<void()> job)
+void Tpool::add_job(std::function<void()> job)
 {
   {
-    unique_lock<mutex> lock(q_mutex);
+    std::unique_lock<std::mutex> lock(q_mutex);
     q.push(job);
   }
 
