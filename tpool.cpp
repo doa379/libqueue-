@@ -8,23 +8,15 @@ Tpool::Tpool(void)
 
 Tpool::~Tpool(void)
 {
-  tpool_exit();
-
-  if (th)
-    {
-      th->join();
-      delete th;
-    }
-}
-
-void Tpool::tpool_exit(void)
-{
-  quit = 1;
-
   {
     std::lock_guard<std::mutex> lock(q_mutex);
+    quit = 1;
+    while(!q.empty()) q.pop();
     cond_var.notify_one();
   }
+  
+  th->join();
+  delete th;
 }
 
 void Tpool::worker(void)
@@ -34,11 +26,8 @@ void Tpool::worker(void)
       {
 	std::unique_lock<std::mutex> lock(q_mutex);
 
-	while (q.empty() && !quit)
-	  {
-	    // Sleeping
-	    cond_var.wait(lock);
-	  }
+	while (q.empty() && !quit) // Sleeping
+	  cond_var.wait(lock);
 
 	if (q.empty())
 	  continue;
