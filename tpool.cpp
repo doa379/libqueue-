@@ -14,7 +14,7 @@ Tpool::~Tpool(void)
     while(!q.empty()) q.pop();
     cond_var.notify_one();
   }
-  
+
   th->join();
   delete th;
 }
@@ -22,22 +22,22 @@ Tpool::~Tpool(void)
 void Tpool::worker(void)
 {  
   while (!quit)
+  {
     {
-      {
-	std::unique_lock<std::mutex> lock(q_mutex);
+      std::unique_lock<std::mutex> lock(q_mutex);
 
-	while (q.empty() && !quit) // Sleeping
-	  cond_var.wait(lock);
+      while (q.empty() && !quit) // Sleeping
+        cond_var.wait(lock);
 
-	if (q.empty())
-	  continue;
+      if (q.empty())
+        continue;
 
-	job = q.front();
-	q.pop();
-      }
-     
-      job();
+      job = q.front();
+      q.pop();
     }
+
+    job();
+  }
 }
 
 void Tpool::add_job(std::function<void()> job)
@@ -50,7 +50,7 @@ void Tpool::add_job(std::function<void()> job)
   cond_var.notify_one();
 }
 
-size_t Tpool::count(void)
+size_t Tpool::job_count(void)
 {
   return q.size();
 }

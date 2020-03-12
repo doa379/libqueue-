@@ -23,7 +23,7 @@ public:
   Tpool(void);
   ~Tpool(void);
   void add_job(std::function<void()>);
-  size_t count(void);
+  size_t job_count(void);
 };
 
 #endif
