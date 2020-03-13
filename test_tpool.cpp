@@ -22,13 +22,13 @@ int main()
   for (unsigned i = 0; i < 5; i++)
     {
       int v = rand() % 100;
-      tpool.add_job(std::bind(func_cb, v));
+      tpool.add_job([v]() { func_cb(v); });
       std::cout << "Data " << v << "job added" << std::endl;
     }
 
-  while (tpool.count())
+  while (tpool.job_count())
     {
-      std::cout << tpool.count() << " jobs remaining" << std::endl;
+      std::cout << tpool.job_count() << " jobs remaining" << std::endl;
       sleep(1);
     }
 
