@@ -26,10 +26,10 @@ int main()
     V.emplace_back(std::move(v));
   }
 
-  for (int i = 0; i < V.size(); i++)
+  for (std::vector<int>::iterator v = V.begin(); v < V.end(); v++)
   {
-    tpool.add_job([&V, i]() { func_cb(&V.at(i)); });
-    std::cout << "Data " << V.at(i) << "job added" << std::endl;
+    tpool.add_job([v]() { func_cb(&*v); });
+    std::cout << "Data " << *v << "job added" << std::endl;
   }
 
   while (tpool.job_count())
