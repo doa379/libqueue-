@@ -21,11 +21,9 @@ Tpool::~Tpool(void)
 
 void Tpool::clear_jobs(void)
 {
-  {
-    std::lock_guard<std::mutex> lock(q_mutex);
-    while(!q.empty()) q.pop();
-    cond_var.notify_one();
-  }
+  std::lock_guard<std::mutex> lock(q_mutex);
+  while(!q.empty()) q.pop();
+  cond_var.notify_one();
 }
 
 void Tpool::worker(void)
@@ -56,22 +54,15 @@ void Tpool::worker(void)
 
 void Tpool::add_job(std::function<void()> job)
 {
-  {
-    std::unique_lock<std::mutex> lock(q_mutex);
-    q.push(job);
-  }
-
+  std::unique_lock<std::mutex> lock(q_mutex);
+  q.push(job);
   cond_var.notify_one();
 }
 
 size_t Tpool::job_count(void)
 {
   size_t count;
-
-  {
-    std::lock_guard<std::mutex> lock(q_mutex);
-    count = q.size();
-  }
-
+  std::lock_guard<std::mutex> lock(q_mutex);
+  count = q.size();
   return count;
 }
