@@ -11,10 +11,10 @@ Tpool::~Tpool(void)
   {
     std::lock_guard<std::mutex> lock(q_mutex);
     quit = 1;
+    while(!q.empty()) q.pop();
     cond_var.notify_one();
   }
 
-  clear_jobs();
   th->join();
   delete th;
 }
