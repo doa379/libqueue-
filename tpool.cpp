@@ -45,10 +45,14 @@ void Tpool::worker(void)
         continue;
 
       curr_job = q.front();
-      q.pop();
     }
 
     curr_job();
+
+    {
+      std::unique_lock<std::mutex> lock(q_mutex);
+      q.pop();
+    }
   }
 }
 
