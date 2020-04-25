@@ -41,9 +41,6 @@ void Tpool::worker(void)
       if (quit)
         break;
 
-      else if (q.empty())
-        continue;
-
       curr_job = q.front();
     }
 
