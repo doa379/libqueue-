@@ -12,8 +12,8 @@ class Tpool
   std::thread *th;
   void worker(void);
   std::queue<std::function<void()>> q;
-  std::mutex q_mutex;
-  std::condition_variable cond_var;
+  std::mutex q_mtx;
+  std::condition_variable cv;
   bool quit;
 
 public:
@@ -22,6 +22,7 @@ public:
   void clear_jobs(void);
   void add_job(std::function<void()>);
   size_t job_count(void);
+  void suspend(void);
 };
 
 #endif
