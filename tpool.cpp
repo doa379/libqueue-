@@ -39,7 +39,7 @@ void Tpool::worker(void)
     curr_job();
 
     {
-      std::unique_lock<std::mutex> lock(q_mtx);
+      std::lock_guard<std::mutex> lock(q_mtx);
       q.pop();
     }
   }
@@ -57,8 +57,14 @@ void Tpool::add_job(std::function<void()> job)
 
 size_t Tpool::job_count(void)
 {
-  std::lock_guard<std::mutex> lock(q_mtx);
-  return q.size();
+  size_t q_size;
+
+  {
+    std::lock_guard<std::mutex> lock(q_mtx);
+    q_size = q.size();
+  }
+
+  return q_size;
 }
 
 void Tpool::suspend(void)
