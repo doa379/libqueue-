@@ -57,14 +57,8 @@ void Tpool::add_job(std::function<void()> job)
 
 size_t Tpool::job_count(void)
 {
-  size_t q_size;
-
-  {
-    std::lock_guard<std::mutex> lock(q_mtx);
-    q_size = q.size();
-  }
-
-  return q_size;
+  std::lock_guard<std::mutex> lock(q_mtx);
+  return q.size();
 }
 
 void Tpool::suspend(void)
