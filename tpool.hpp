@@ -22,7 +22,6 @@ public:
   void clear_jobs(void);
   void add_job(std::function<void()>);
   size_t job_count(void);
-  void suspend(void);
 };
 
 #endif

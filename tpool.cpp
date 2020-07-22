@@ -8,7 +8,11 @@ Tpool::Tpool(void)
 
 Tpool::~Tpool(void)
 {
-  suspend();
+  {
+    std::lock_guard<std::mutex> lock(q_mtx);
+    quit = 1;
+  }
+  cv.notify_one();
   th->join();
   delete th;
 }
@@ -47,9 +51,6 @@ void Tpool::worker(void)
 
 void Tpool::add_job(std::function<void()> job)
 {
-  if (quit)
-    return;
-
   std::lock_guard<std::mutex> lock(q_mtx);
   q.push(job);
   cv.notify_one();
@@ -61,9 +62,3 @@ size_t Tpool::job_count(void)
   return q.size();
 }
 
-void Tpool::suspend(void)
-{
-  std::lock_guard<std::mutex> lock(q_mtx);
-  quit = 1;
-  cv.notify_one();
-}
