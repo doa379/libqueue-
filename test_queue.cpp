@@ -15,7 +15,7 @@ int main()
   Queue<unsigned> q;
   std::thread th(func_th, &q);
   sleep(1);
-  while (q.size())
+  while (!q.is_empty())
   {
     unsigned v;
     if (q.pop(v))

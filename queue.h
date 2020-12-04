@@ -12,17 +12,17 @@ class Queue
   std::queue<T> q;       
   std::mutex q_mtx;                 
   std::condition_variable cv;       
-  std::atomic<bool> m_forceExit { false };  
+  std::atomic<bool> quit { false };  
   public:
   void push(T const &val)
   {
-    m_forceExit.store(false);
+    quit.store(false);
     std::unique_lock<std::mutex> lock(q_mtx);
     q.push(val);
     lock.unlock();
     cv.notify_one();
   }
-  bool isEmpty() const
+  bool is_empty()
   {
     std::unique_lock<std::mutex> lock(q_mtx);
     return q.empty();
@@ -36,22 +36,22 @@ class Queue
     q.pop();
     return true;
   }
-  bool wpop(T &val)
+  bool waitpop(T &val)
   {
     std::unique_lock<std::mutex> lock(q_mtx);
     cv.wait(lock, 
-      [&]() -> bool { return !q.empty() || m_forceExit.load(); } );
-    if (m_forceExit.load()) return false;
+      [&]() -> bool { return !q.empty() || quit.load(); } );
+    if (quit.load()) return false;
     val = q.front();
     q.pop();
     return true;
   }
-  bool wtpop(T &val, unsigned long milliseconds = DEFAULT_WAITTIME_MS)
+  bool waitpop_time(T &val, unsigned long milliseconds = DEFAULT_WAITTIME_MS)
   {
     std::unique_lock<std::mutex> lock(q_mtx);
     cv.wait_for(lock, std::chrono::milliseconds(milliseconds), 
-      [&]() -> bool { return !q.empty() || m_forceExit.load(); } );
-    if (m_forceExit.load()) return false;
+      [&]() -> bool { return !q.empty() || quit.load(); } );
+    if (quit.load()) return false;
     if (q.empty()) return false;
     val = q.front();
     q.pop();
@@ -64,7 +64,7 @@ class Queue
   }
   void clear()
   { 
-    m_forceExit.store(true);
+    quit.store(true);
     std::unique_lock<std::mutex> lock(q_mtx);
     while (!q.empty())
     {
@@ -72,8 +72,8 @@ class Queue
       q.pop();
     }
   }
-  bool isExit() const
+  bool is_exit() const
   {
-    return m_forceExit.load();
+    return quit.load();
   }
 };
